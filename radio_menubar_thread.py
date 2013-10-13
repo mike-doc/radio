@@ -46,7 +46,7 @@ class Radio(QtGui.QMainWindow):
 		my_timer = QtCore.QTimer()
 		self.timers.append(my_timer)
 		# my_timer.timeout.connect(self.stop_dwn)
-		my_timer.singleShot(1000, self.timer)
+		my_timer.singleShot(5000, self.timer)
 
 		# Buttons
 		play_button = QtGui.QPushButton("Play", self)
