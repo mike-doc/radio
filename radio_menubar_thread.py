@@ -6,6 +6,7 @@ pygst.require("0.10")
 import gst
 from PyQt4 import QtGui, QtCore
 import AddStationDialog
+import json
 
 
 #music stations on a dictionary
@@ -14,6 +15,16 @@ music_stations = {'Rythmos 94.9':'http://rythmos.live24.gr:80/rythmos','Music 89
 ,'Real Fm':'http://realfm.live24.gr/real','Kiss FM':'http://kissfm.live24.gr/kiss2111','Cosmoradio 95,1 Thessaloniki':'http://80.86.82.101:8130','Sohos FM 88.7':'http://85.17.121.228:8418'
 ,'Radio Polis 99.4':'http://85.17.121.103:8088','Venus FM 105,1':'http://62.212.82.142:8171','EllinikosFM.com':'http://159.253.149.12:9398','Laika Fm':'http://s3.onweb.gr:8474'
 ,'Our Boys radio':'http://83.136.86.53:8688','Relaidio FM!!!':'http://95.154.254.153:3885','ERA Sports':'http://72.91.227.18:8000','Nitro Radio':'http://nitro.live24.gr:80/nitro4555'}
+
+
+#load music_stations if exists
+try:
+   with open('data.json'):
+       with open('data.json','rb') as fp:
+			music_stations=json.load(fp)
+except IOError:
+   with open('data.json', 'wb') as fp:
+			json.dump(music_stations, fp)
 
 #creates a playbin (plays media form an uri) 
 player = gst.element_factory_make("playbin", "player")
@@ -35,7 +46,7 @@ class Radio(QtGui.QMainWindow):
 		my_timer = QtCore.QTimer()
 		self.timers.append(my_timer)
 		# my_timer.timeout.connect(self.stop_dwn)
-		my_timer.singleShot(1000, self.timer)
+		my_timer.singleShot(5000, self.timer)
 
 		# Buttons
 		play_button = QtGui.QPushButton("Play", self)
@@ -95,7 +106,7 @@ class Radio(QtGui.QMainWindow):
 	def play(self):
 
 		player.set_state(gst.STATE_NULL)
-		print music_stations[str(self.combo.currentText())]
+		print str(self.combo.currentText())
 		#set the uri
 		music_stream_uri=music_stations[str(self.combo.currentText())]
 		player.set_property('uri', music_stream_uri)
@@ -138,14 +149,18 @@ class Radio(QtGui.QMainWindow):
 	def addstation_accepted(self):
 
 		radio_name = str(self.dialog.radio_name.text())
-		radio_adress = str(self.dialog.radio_adress.text())	
-		print radio_name, radio_adress
+		radio_adress = str(self.dialog.radio_adress.text())
+		music_stations[radio_name]=radio_adress
+		with open('data.json', 'wb') as fp:
+			json.dump(music_stations, fp)
+		print radio_name, radio_adress,"just added"
 		self.dialog.hide()
 
 
 	def timer(self):
 		
 		print "Works"
+
 
 	class rec_thread(QtCore.QThread):
 		def __init__(self, name):
