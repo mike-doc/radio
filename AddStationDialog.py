@@ -1,10 +1,12 @@
 from PyQt4 import QtGui, QtCore
 
 class AddStationDialog(QtGui.QDialog):
-	def __init__(self):
+	def __init__(self, parent):
 
 		QtGui.QDialog.__init__(self)
 		self.signal = "addstation"
+		# parent.setEnabled(False)
+		self.setParent(parent)
 
 		self.radio_name = QtGui.QLineEdit()
 		self.radio_adress = QtGui.QLineEdit()
@@ -34,6 +36,8 @@ class AddStationDialog(QtGui.QDialog):
 		vbox.addLayout(hbox)
 		self.setLayout(vbox)
 		self.setFixedSize(450, 100)
+
+		self.setWindowFlags(QtCore.Qt.Dialog)
 
 
 	def accept(self):

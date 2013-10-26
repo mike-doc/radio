@@ -121,7 +121,7 @@ class Radio(QtGui.QMainWindow):
 				
 	def add_radio(self):
 
-		self.dialog = AddStationDialog.AddStationDialog()
+		self.dialog = AddStationDialog.AddStationDialog(self)
 		# self.dialog.setParent(self)
 		self.dialog.setWindowTitle("Add a radio station")
 		self.connect(self.dialog, QtCore.SIGNAL(self.dialog.signal), self.addstation_accepted)
@@ -146,7 +146,6 @@ class Radio(QtGui.QMainWindow):
 	def timer(self):
 		
 		print "Works"
-
 
 	class rec_thread(QtCore.QThread):
 		def __init__(self, name):
