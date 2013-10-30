@@ -43,10 +43,10 @@ class Radio(QtGui.QMainWindow):
 		
 	def initUI(self):
 
-		my_timer = QtCore.QTimer()
-		self.timers.append(my_timer)
+		##my_timer = QtCore.QTimer()
+		##self.timers.append(my_timer)
 		# my_timer.timeout.connect(self.stop_dwn)
-		my_timer.singleShot(5000, self.timer)
+		##my_timer.singleShot(5000, self.timer)
 
 		# Buttons
 		play_button = QtGui.QPushButton("Play", self)
@@ -55,10 +55,23 @@ class Radio(QtGui.QMainWindow):
 		stop_button.clicked.connect(self.stop_radio)
 		rec_button = QtGui.QPushButton("Rec", self)
 		rec_button.clicked.connect(self.Rec)
+		stop_download = QtGui.QPushButton("Stop Recording", self)
+		stop_download.clicked.connect(self.stop_dwn)
 		quit_button = QtGui.QPushButton("Quit", self)
 		quit_button.clicked.connect(QtCore.QCoreApplication.instance().quit)
-		stop_download = QtGui.QPushButton("Stop Dwn", self)
-		stop_download.clicked.connect(self.stop_dwn)
+
+		#create slider for volume
+		sld = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+		sld.setFocusPolicy(QtCore.Qt.NoFocus)
+		sld.setGeometry(30, 40, 100, 30)
+		sld.valueChanged[int].connect(self.changeValue)
+
+
+		#sound image
+		self.label = QtGui.QLabel(self)
+		self.label.setPixmap(QtGui.QPixmap('mute.png'))
+		self.label.setGeometry(160, 40, 80, 30)
+		
 		
 		#Menubar
 		add_Action = QtGui.QAction('&Add Station', self)
@@ -86,6 +99,8 @@ class Radio(QtGui.QMainWindow):
 		hbox.addWidget(rec_button)
 		hbox.addWidget(stop_download)
 		hbox.addWidget(quit_button)
+		hbox.addWidget(sld)
+		hbox.addWidget(self.label)
 		hbox.addStretch(1)
 		
 		vbox = QtGui.QVBoxLayout()
@@ -97,7 +112,7 @@ class Radio(QtGui.QMainWindow):
 		self.setCentralWidget(widget)
 		
 		
-		self.setGeometry(300, 300, 300, 150)
+		self.setGeometry(300, 300, 300, 80)
 		self.setWindowTitle("Radio")
 		self.show()
 
@@ -151,6 +166,7 @@ class Radio(QtGui.QMainWindow):
 		radio_name = str(self.dialog.radio_name.text())
 		radio_adress = str(self.dialog.radio_adress.text())
 		music_stations[radio_name]=radio_adress
+		self.combo.addItem(radio_name)
 		with open('data.json', 'wb') as fp:
 			json.dump(music_stations, fp)
 		print radio_name, radio_adress,"just added"
@@ -161,6 +177,17 @@ class Radio(QtGui.QMainWindow):
 		
 		print "Works"
 
+	def changeValue(self, value):
+		player.set_property('volume', value/100.0)
+		if value == 0:
+			self.label.setPixmap(QtGui.QPixmap('mute.png'))
+		elif value > 0 and value <= 30:
+			self.label.setPixmap(QtGui.QPixmap('min.png'))
+		elif value > 30 and value < 80:
+			self.label.setPixmap(QtGui.QPixmap('med.png'))
+		else:
+			self.label.setPixmap(QtGui.QPixmap('max.png'))
+
 
 	class rec_thread(QtCore.QThread):
 		def __init__(self, name):
@@ -170,7 +197,7 @@ class Radio(QtGui.QMainWindow):
 		def run(self):
 			print "Recording Now"
 			music_stream_uri = music_stations[str(self.name)]
-			urllib.urlretrieve(music_stream_uri, "/home/mike/record_0.mp3")
+			urllib.urlretrieve(music_stream_uri,'sample.mp3')
 
 
 
