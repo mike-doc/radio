@@ -8,6 +8,7 @@ from PyQt4 import QtGui, QtCore
 import AddStationDialog
 import json
 
+rec=[0]
 
 #music stations on a dictionary
 music_stations = {'Rythmos 94.9':'http://rythmos.live24.gr:80/rythmos','Music 89.2':'http://mfile.akamai.com/6495/live/reflector:52713.asx?bkup=58044','Sfera Fm':'http://sfera.live24.gr/sfera4132'
@@ -49,15 +50,15 @@ class Radio(QtGui.QMainWindow):
 		##my_timer.singleShot(5000, self.timer)
 
 		# Buttons
-		play_button = QtGui.QPushButton("Play", self)
+		play_button = QtGui.QPushButton("", self)
 		play_button.clicked.connect(self.play)
-		stop_button = QtGui.QPushButton("Stop", self)
+		stop_button = QtGui.QPushButton("", self)
 		stop_button.clicked.connect(self.stop_radio)
-		rec_button = QtGui.QPushButton("Rec", self)
-		rec_button.clicked.connect(self.Rec)
-		stop_download = QtGui.QPushButton("Stop Recording", self)
-		stop_download.clicked.connect(self.stop_dwn)
-		quit_button = QtGui.QPushButton("Quit", self)
+		self.rec_button = QtGui.QPushButton("", self)
+		self.rec_button.clicked.connect(self.Rec)
+		#stop_download = QtGui.QPushButton("Stop Recording", self)
+		#stop_download.clicked.connect(self.stop_dwn)
+		quit_button = QtGui.QPushButton("", self)
 		quit_button.clicked.connect(QtCore.QCoreApplication.instance().quit)
 
 		#create slider for volume
@@ -69,8 +70,18 @@ class Radio(QtGui.QMainWindow):
 
 		#sound image
 		self.label = QtGui.QLabel(self)
-		self.label.setPixmap(QtGui.QPixmap('mute.png'))
+		self.label.setPixmap(QtGui.QPixmap('buttons/mute.png'))
 		self.label.setGeometry(160, 40, 80, 30)
+
+		#image buttons
+		play_icon = QtGui.QIcon("buttons/play.png")
+		play_button.setIcon(play_icon)
+		rec_icon=QtGui.QIcon("buttons/rec.png")
+		self.rec_button.setIcon(rec_icon)
+		stop_icon=QtGui.QIcon("buttons/stop.png")
+		stop_button.setIcon(stop_icon)
+		quit_icon=QtGui.QIcon("buttons/quit.png")
+		quit_button.setIcon(quit_icon)
 		
 		
 		#Menubar
@@ -96,8 +107,8 @@ class Radio(QtGui.QMainWindow):
 		hbox.addWidget(self.combo)
 		hbox.addWidget(play_button)
 		hbox.addWidget(stop_button)
-		hbox.addWidget(rec_button)
-		hbox.addWidget(stop_download)
+		hbox.addWidget(self.rec_button)
+		#hbox.addWidget(stop_download)
 		hbox.addWidget(quit_button)
 		hbox.addWidget(sld)
 		hbox.addWidget(self.label)
@@ -115,6 +126,7 @@ class Radio(QtGui.QMainWindow):
 		self.setGeometry(300, 300, 300, 80)
 		self.setWindowTitle("Radio")
 		self.show()
+
 
 		
 		
@@ -138,10 +150,17 @@ class Radio(QtGui.QMainWindow):
 
 
 	def Rec(self):
-
-		self.rec = self.rec_thread(self.combo.currentText())
-		threads.append(self.rec)
-		self.rec.start()
+		if not rec[0]==0:
+			rec_icon=QtGui.QIcon("buttons/rec.png")
+			self.rec_button.setIcon(rec_icon)
+			rec[0]=0
+			self.stop_dwn()
+		else:
+			rec_icon=QtGui.QIcon("buttons/rec_on.png")
+			self.rec_button.setIcon(rec_icon)
+			self.rec = self.rec_thread(self.combo.currentText())
+			threads.append(self.rec)
+			self.rec.start()
 				
 
 				
@@ -180,13 +199,13 @@ class Radio(QtGui.QMainWindow):
 	def changeValue(self, value):
 		player.set_property('volume', value/100.0)
 		if value == 0:
-			self.label.setPixmap(QtGui.QPixmap('mute.png'))
+			self.label.setPixmap(QtGui.QPixmap('buttons/mute.png'))
 		elif value > 0 and value <= 30:
-			self.label.setPixmap(QtGui.QPixmap('min.png'))
+			self.label.setPixmap(QtGui.QPixmap('buttons/min.png'))
 		elif value > 30 and value < 80:
-			self.label.setPixmap(QtGui.QPixmap('med.png'))
+			self.label.setPixmap(QtGui.QPixmap('buttons/med.png'))
 		else:
-			self.label.setPixmap(QtGui.QPixmap('max.png'))
+			self.label.setPixmap(QtGui.QPixmap('buttons/max.png'))
 
 
 	class rec_thread(QtCore.QThread):
@@ -195,9 +214,16 @@ class Radio(QtGui.QMainWindow):
 			self.name = name
 	  
 		def run(self):
+			if not rec[0]==0:
+				print"bhka"
+				rec[0]=0
+				self.terminate()
 			print "Recording Now"
+			rec[0]=1
 			music_stream_uri = music_stations[str(self.name)]
 			urllib.urlretrieve(music_stream_uri,'sample.mp3')
+
+
 
 
 
